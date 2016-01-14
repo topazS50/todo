@@ -4,11 +4,23 @@ import pandas as pd
 import itertools
 
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
 count_ = itertools.count()
 MODE_EXIT = count_.next()
 MODE_LIST = count_.next()
 MODE_SELECT = count_.next()
 MODE_ADD = count_.next()
+MODE_ADDTOP = count_.next()
 MODE_DEL = count_.next()
 MODE_TOP = count_.next()
 MODE_BOTTOM = count_.next()
@@ -35,7 +47,10 @@ while mode != MODE_EXIT:
         print BARS
         counter_ = 0
         for id_, row in df.iterrows():
-            print id_, row[0]
+            if id_ == 0:
+                print bcolors.OKGREEN + str(id_) + ' ' + row[0] + bcolors.ENDC
+            else:
+                print id_, row[0]
             if counter_ == MAX_PRINT:
                 input_ = raw_input(BARS + ' (s)skip: ')
                 if input_ == 's':
@@ -49,6 +64,8 @@ while mode != MODE_EXIT:
         input_ = raw_input('(a)add, (l)list, (d)delete, (t)top, (dw)down, (done), (e)exit :')
         if input_ == 'a':
             mode = MODE_ADD
+        elif input_ == 'at':
+            mode = MODE_ADDTOP
         elif input_ == 'l':
             mode = MODE_LIST
         elif input_ in ['e','']:
@@ -70,12 +87,22 @@ while mode != MODE_EXIT:
         else:
             df = df.append(pd.DataFrame([input_], columns=['task']), ignore_index=True)
             df.to_csv('todo.csv', sep='\t')
+    elif mode == MODE_ADDTOP:
+        input_ = raw_input('task: ')
+        if input_ == '':
+            mode = MODE_LIST
+        else:
+            df = df.append(pd.DataFrame([input_], columns=['task']), ignore_index=True)
+            reorder_ = [len(df) - 1] + range(len(df) - 1)
+            df = df.reindex(reorder_).reset_index(drop=True)
+            df.to_csv('todo.csv', sep='\t')
     elif mode == MODE_DEL:
         id_delete = int(raw_input('id to delete: '))
         print str(df.loc[id_delete])
         input_ = raw_input('delete this?[y/N]: ')
         if input_ == 'y':
             df = df.drop([id_delete])
+            df = df.reset_index(drop=True)
         mode = MODE_LIST
     elif mode == MODE_TOP:
         i = int(raw_input('id to bring top: '))
