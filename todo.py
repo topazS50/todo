@@ -62,7 +62,7 @@ def main():
                 counter_ += 1
             mode = MODE_SELECT
         elif mode == MODE_SELECT:
-            input_ = raw_input('(a)add, (l)list, (d)delete, (t)top, (dw)down, (done), (e)exit :')
+            input_ = raw_input('(a)add, (at)add top, (l)list, (d)delete, (t)top, (dw)down, (done), (e)exit :')
             if input_ == 'a':
                 mode = MODE_ADD
             elif input_ == 'at':
@@ -124,8 +124,7 @@ def main():
             else:
                 i = int(input_[0])
                 j = 1
-            reorder_ = range(len(df))
-            reorder_[i], reorder_[i+j] = reorder_[i+j], reorder_[i]
+            reorder_ = range(i) + range(i+1, i+j+1) + [i] + range(i+j+1, len(df))
             df = df.reindex(reorder_).reset_index(drop=True)
             df.to_csv(CSV, sep='\t')
             mode = MODE_LIST

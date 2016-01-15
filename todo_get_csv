@@ -1,0 +1,2 @@
+cp -rp /home/ogawak/.todo/todo.csv /home/ogawak/.todo/todo.csv-
+scp -rp ogawak@selene:/home/ogawak/todo.csv /home/ogawak/.todo/todo.csv
