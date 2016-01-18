@@ -1,2 +1,2 @@
 ssh -l ogawak selene cp /home/ogawak/todo.csv /home/ogawak/todo.csv-
-scp -rp /home/ogawak/.todo/todo.csv ogawak@selene:/home/ogawak/todo.csv
+scp -rp ~/.todo/todo.csv ogawak@selene:/home/ogawak/todo.csv

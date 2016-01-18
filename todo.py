@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import itertools
+import subprocess
 
 
 class bcolors:
@@ -25,14 +26,18 @@ MODE_TOP = count_.next()
 MODE_BOTTOM = count_.next()
 MODE_DOWN = count_.next()
 MODE_DONE = count_.next()
+MODE_PEND = count_.next()
+MODE_EDIT = count_.next()
 
 BARS = '---------'
 MAX_PRINT = 10
+EDITOR = 'vim'
 
 ROOTDIR = os.path.join(os.path.expanduser('~'), '.todo')
 CSV = os.path.join(ROOTDIR, 'todo.csv')
 CSV_BKP = os.path.join(ROOTDIR, 'todo.csv~')
 CSV_DONE = os.path.join(ROOTDIR, 'done.csv')
+CSV_PEND = os.path.join(ROOTDIR, 'pend.csv')
 
 
 def main():
@@ -81,19 +86,23 @@ def main():
                 mode = MODE_DOWN
             elif input_ == 'done':
                 mode = MODE_DONE
+            elif input_ == 'pend':
+                mode = MODE_PEND
+            elif input_ == 'ed':
+                mode = MODE_EDIT
         elif mode == MODE_ADD:
             input_ = raw_input('task: ')
             if input_ == '':
                 mode = MODE_LIST
             else:
-                df = df.append(pd.DataFrame([input_], columns=['task']), ignore_index=True)
+                df = df.append(pd.DataFrame([[input_, pd.datetime.now()]], columns=['task', 'time']), ignore_index=True)
                 df.to_csv('todo.csv', sep='\t')
         elif mode == MODE_ADDTOP:
             input_ = raw_input('task: ')
             if input_ == '':
                 mode = MODE_LIST
             else:
-                df = df.append(pd.DataFrame([input_], columns=['task']), ignore_index=True)
+                df = df.append(pd.DataFrame([[input_, pd.datetime.now()]], columns=['task', 'time']), ignore_index=True)
                 reorder_ = [len(df) - 1] + range(len(df) - 1)
                 df = df.reindex(reorder_).reset_index(drop=True)
                 df.to_csv('todo.csv', sep='\t')
@@ -131,9 +140,22 @@ def main():
         elif mode == MODE_DONE:
             id_ = int(raw_input('id done: '))
             with open(CSV_DONE, 'a') as fa:
+                df.loc[id_, 'time done'] = pd.datetime.now()
+                df.loc[id_:id_].to_csv(fa, sep='\t', header=False)
+            df = df.drop([id_])
+            df = df.reset_index(drop=True)
+            mode = MODE_LIST
+        elif mode == MODE_PEND:
+            id_ = int(raw_input('id done: '))
+            with open(CSV_PEND, 'a') as fa:
                 df.loc[id_:id_].to_csv(fa, header=False)
             df = df.drop([id_])
             df = df.reset_index(drop=True)
+            mode = MODE_LIST
+        elif mode == MODE_EDIT:
+            id_ = int(raw_input('id edit: '))
+            fileedit = df.loc[id_]['task'].replace(' ', '').replace([':','.'], '_')
+            subprocess.check_call(EDITOR + ' ' + ROOTDIR + fileedit, shell=True)
             mode = MODE_LIST
 
     df.to_csv(CSV, sep='\t')
