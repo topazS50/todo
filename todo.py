@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import itertools
 import subprocess
+import re
 
 
 class bcolors:
@@ -31,7 +32,7 @@ MODE_EDIT = count_.next()
 
 BARS = '---------'
 MAX_PRINT = 10
-EDITOR = 'vim'
+EDITOR = 'nano'
 
 ROOTDIR = os.path.join(os.path.expanduser('~'), '.todo')
 CSV = os.path.join(ROOTDIR, 'todo.csv')
@@ -154,8 +155,8 @@ def main():
             mode = MODE_LIST
         elif mode == MODE_EDIT:
             id_ = int(raw_input('id edit: '))
-            fileedit = df.loc[id_]['task'].replace(' ', '').replace([':','.'], '_')
-            subprocess.check_call(EDITOR + ' ' + ROOTDIR + fileedit, shell=True)
+            fileedit = re.sub('[ .,:]', '', df.loc[id_]['task'])
+            subprocess.check_call(EDITOR + ' ' + os.path.join(ROOTDIR, fileedit), shell=True)
             mode = MODE_LIST
 
     df.to_csv(CSV, sep='\t')

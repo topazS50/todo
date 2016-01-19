@@ -1,2 +1,3 @@
 cp -rp ~/.todo/todo.csv ~/.todo/todo.csv-
+cp -rp ~/.todo/done.csv ~/.todo/done.csv-
 scp -rp ogawak@selene:/home/ogawak/todo.csv ~/.todo/todo.csv
