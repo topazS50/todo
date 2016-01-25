@@ -69,6 +69,8 @@ def main():
             mode = MODE_SELECT
         elif mode == MODE_SELECT:
             input_ = raw_input('(a)add, (at)add top, (l)list, (d)delete, (t)top, (dw)down, (done), (e)exit :')
+            arg_ = input_.split(' ')
+            input_ = arg_[0]
             if input_ == 'a':
                 mode = MODE_ADD
             elif input_ == 'at':
