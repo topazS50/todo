@@ -29,6 +29,7 @@ MODE_DOWN = count_.next()
 MODE_DONE = count_.next()
 MODE_PEND = count_.next()
 MODE_EDIT = count_.next()
+MODE_MOVE = count_.next()
 
 BARS = '---------'
 MAX_PRINT = 10
@@ -41,6 +42,32 @@ CSV_DONE = os.path.join(ROOTDIR, 'done.csv')
 CSV_PEND = os.path.join(ROOTDIR, 'pend.csv')
 
 
+def display_list(df):
+    os.system('clear')
+    print BARS
+    counter_ = 0
+    for id_, row in df.iterrows():
+        if id_ == 0:
+            print bcolors.OKGREEN + str(id_) + ' ' + row[0] + bcolors.ENDC
+        else:
+            print id_, row[0]
+        if counter_ == MAX_PRINT:
+            input_ = raw_input(BARS + ' (s)skip: ')
+            if input_ == 's':
+                break
+            counter_ = 0
+        else:
+            print BARS
+        counter_ += 1
+
+
+def add_item(df, input_):
+    df = df.append(pd.DataFrame([[input_, pd.datetime.now()]], columns=['task', 'time']), ignore_index=True)
+    df1 = pd.DataFrame([[input_, pd.datetime.now()]], columns=['task', 'time'])
+    basename = str(pd.datetime.now()) + '-' + input_ + '.csv'
+    df1.to_csv(os.path.join(ROOTDIR, basename), sep='\t')
+    return df
+
 def main():
     try:
         df = pd.read_csv(CSV, sep='\t', index_col=0)
@@ -50,22 +77,7 @@ def main():
     mode = MODE_LIST
     while mode != MODE_EXIT:
         if mode == MODE_LIST:
-            os.system('clear')
-            print BARS
-            counter_ = 0
-            for id_, row in df.iterrows():
-                if id_ == 0:
-                    print bcolors.OKGREEN + str(id_) + ' ' + row[0] + bcolors.ENDC
-                else:
-                    print id_, row[0]
-                if counter_ == MAX_PRINT:
-                    input_ = raw_input(BARS + ' (s)skip: ')
-                    if input_ == 's':
-                        break
-                    counter_ = 0
-                else:
-                    print BARS
-                counter_ += 1
+            display_list(df)
             mode = MODE_SELECT
         elif mode == MODE_SELECT:
             input_ = raw_input('(a)add, (at)add top, (l)list, (d)delete, (t)top, (dw)down, (done), (e)exit :')
@@ -96,7 +108,8 @@ def main():
             if input_ == '':
                 mode = MODE_LIST
             else:
-                df = df.append(pd.DataFrame([[input_, pd.datetime.now()]], columns=['task', 'time']), ignore_index=True)
+                # under dev
+                df = add_item(df, input_)
                 df.to_csv('todo.csv', sep='\t')
         elif mode == MODE_ADDTOP:
             input_ = raw_input('task: ')
