@@ -44,10 +44,12 @@ CSV_PEND = os.path.join(ROOTDIR, 'pend.csv')
 
 
 def fill_empty_cells(df):
-    df[df['time_added'].isnull()]['time_added'] = df['time_updated']
+    slice_ = df['time_added'].isnull()
+    df.loc[slice_, 'time_added'] = df.loc[slice_, 'time_updated']
+    return df
 
 def display_list(df):
-    fill_empty_cells(df)
+    df = fill_empty_cells(df)
     df = df.sort_values(by='time_updated', ascending=False)
     df = df.reset_index(drop=True)
     os.system('clear')
@@ -55,9 +57,9 @@ def display_list(df):
     counter_ = 0
     for id_, row in df.iterrows():
         if id_ == 0:
-            print bcolors.OKGREEN + str(id_) + ' ' + row[0] + ' ' + row[1] + bcolors.ENDC
+            print bcolors.OKGREEN + str(id_) + ' ' + str(row[0]) + ' ' + str(row[1]) + ' ' + str(row[2]) + bcolors.ENDC
         else:
-            print id_, row[0], row[1]
+            print id_, row[0], row[1], row[2]
         if counter_ == MAX_PRINT:
             input_ = raw_input(BARS + ' (s)skip: ')
             if input_ == 's':
