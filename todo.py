@@ -43,6 +43,8 @@ CSV_PEND = os.path.join(ROOTDIR, 'pend.csv')
 
 
 def fill_empty_cells(df):
+    slice_ = df['status'].isnull()
+    df.loc[slice_, 'status'] = 0
     slice_ = df['time_added'].isnull()
     df.loc[slice_, 'time_added'] = df.loc[slice_, 'time_updated']
     slice_ = df['importance'].isnull()
@@ -52,6 +54,7 @@ def fill_empty_cells(df):
 
 def display_list(df):
     df = fill_empty_cells(df)
+    df['status'] = df['status'].apply(int)
     df['importance'] = df['importance'].apply(int)
     df = df.sort_values(by='task', ascending=False)
     df = df.sort_values(by='time_added', ascending=False)
@@ -60,11 +63,11 @@ def display_list(df):
     os.system('clear')
     print BARS
     counter_ = 0
-    for id_, row in df[['task','time_added','time_updated','importance']].iterrows():
+    for id_, row in df[['task','time_added','time_updated','importance', 'status']].iterrows():
         if id_ == 0:
-            print bcolors.OKGREEN + str(id_) + ' ' + str(row[0]) + ' ' + str(row[1]) + ' ' + str(row[2]) + ' ' + str(row[3]) + bcolors.ENDC
+            print bcolors.OKGREEN + str(id_) + ' ' + str(row[0]) + ' ' + str(row[1]) + ' ' + str(row[2]) + ' ' + str(row[3]) + ' ' + str(row[4]) + bcolors.ENDC
         else:
-            print id_, row[0], row[1], row[2], row[3]
+            print id_, row[0], row[1], row[2], row[3], row[4]
         if counter_ == MAX_PRINT:
             input_ = raw_input(BARS + ' (s)skip: ')
             if input_ == 's':
@@ -85,8 +88,8 @@ def add_item(df, input_, importance_=0):
     return df
 
 
-mode_read = 1
 def main():
+    mode_read = 1
     df = pd.DataFrame()
     try:
         if mode_read == 0:
