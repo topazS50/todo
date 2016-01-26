@@ -3,6 +3,7 @@ import pandas as pd
 import itertools
 import subprocess
 import re
+import glob
 
 
 class bcolors:
@@ -42,15 +43,21 @@ CSV_DONE = os.path.join(ROOTDIR, 'done.csv')
 CSV_PEND = os.path.join(ROOTDIR, 'pend.csv')
 
 
+def fill_empty_cells(df):
+    df[df['time_added'].isnull()]['time_added'] = df['time_updated']
+
 def display_list(df):
+    fill_empty_cells(df)
+    df = df.sort_values(by='time_updated', ascending=False)
+    df = df.reset_index(drop=True)
     os.system('clear')
     print BARS
     counter_ = 0
     for id_, row in df.iterrows():
         if id_ == 0:
-            print bcolors.OKGREEN + str(id_) + ' ' + row[0] + bcolors.ENDC
+            print bcolors.OKGREEN + str(id_) + ' ' + row[0] + ' ' + row[1] + bcolors.ENDC
         else:
-            print id_, row[0]
+            print id_, row[0], row[1]
         if counter_ == MAX_PRINT:
             input_ = raw_input(BARS + ' (s)skip: ')
             if input_ == 's':
@@ -61,17 +68,27 @@ def display_list(df):
         counter_ += 1
 
 
+def now_():
+    return pd.datetime.now().strftime("%Y%m%d.%H%M.%S.%f")
+
+
 def add_item(df, input_):
-    df = df.append(pd.DataFrame([[input_, pd.datetime.now()]], columns=['task', 'time']), ignore_index=True)
-    df1 = pd.DataFrame([[input_, pd.datetime.now()]], columns=['task', 'time'])
-    basename = str(pd.datetime.now()) + '-' + input_ + '.csv'
-    df1.to_csv(os.path.join(ROOTDIR, basename), sep='\t')
+    df = df.append(pd.DataFrame([[input_, now_(), now_()]], columns=['task', 'time_added', 'time_updated']), ignore_index=True)
     return df
 
+
+mode_read = 0
 def main():
+    df = pd.DataFrame()
     try:
-        df = pd.read_csv(CSV, sep='\t', index_col=0)
-        df.to_csv(CSV_BKP, sep='\t')
+        if mode_read == 0:
+            df = pd.read_csv(CSV, sep='\t', index_col=0)
+        elif mode_read == 1:
+            listdir_ = glob.glob(os.path.join(ROOTDIR, 'todo') + '/*.csv')
+            for file_ in listdir_:
+                df_in = pd.read_csv(file_, sep='\t')
+                df = df.append(df_in)
+            df = df.reset_index(drop=True)
     except:
         df = pd.DataFrame(columns=['task', 'status'])
     mode = MODE_LIST
@@ -116,7 +133,7 @@ def main():
             if input_ == '':
                 mode = MODE_LIST
             else:
-                df = df.append(pd.DataFrame([[input_, pd.datetime.now()]], columns=['task', 'time']), ignore_index=True)
+                df = add_item(df, input_)
                 reorder_ = [len(df) - 1] + range(len(df) - 1)
                 df = df.reindex(reorder_).reset_index(drop=True)
                 df.to_csv('todo.csv', sep='\t')
@@ -132,6 +149,7 @@ def main():
             i = int(raw_input('id to bring top: '))
             reorder_ = [i] + range(i) + range(i+1, len(df))
             df = df.reindex(reorder_).reset_index(drop=True)
+            df.loc[0, 'time_updated'] = now_()
             df.to_csv(CSV, sep='\t')
             mode = MODE_LIST
         elif mode == MODE_BOTTOM:
@@ -154,7 +172,7 @@ def main():
         elif mode == MODE_DONE:
             id_ = int(raw_input('id done: '))
             with open(CSV_DONE, 'a') as fa:
-                df.loc[id_, 'time done'] = pd.datetime.now()
+                df.loc[id_, 'time_done'] = now_()
                 df.loc[id_:id_].to_csv(fa, sep='\t', header=False)
             df = df.drop([id_])
             df = df.reset_index(drop=True)
@@ -172,7 +190,9 @@ def main():
             subprocess.check_call(EDITOR + ' ' + os.path.join(ROOTDIR, fileedit), shell=True)
             mode = MODE_LIST
 
-    df.to_csv(CSV, sep='\t')
+    for i in range(len(df)):
+        basename = str(df.iloc[i]['time_added']) + '-' + str(df.iloc[i]['task']).replace('/', '_') + '.csv'
+        df[i:i+1].to_csv(os.path.join(ROOTDIR, 'todo', basename), sep='\t', index=False)
 
 
 if __name__ == '__main__':
