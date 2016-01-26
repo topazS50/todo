@@ -22,7 +22,6 @@ MODE_EXIT = count_.next()
 MODE_LIST = count_.next()
 MODE_SELECT = count_.next()
 MODE_ADD = count_.next()
-MODE_ADDTOP = count_.next()
 MODE_DEL = count_.next()
 MODE_TOP = count_.next()
 MODE_BOTTOM = count_.next()
@@ -53,9 +52,10 @@ def fill_empty_cells(df):
 
 def display_list(df):
     df = fill_empty_cells(df)
+    df['importance'] = df['importance'].apply(int)
     df = df.sort_values(by='task', ascending=False)
     df = df.sort_values(by='time_added', ascending=False)
-    df = df.sort_values(by=['importance','time_updated'], ascending=False)
+    df = df.sort_values(by=['importance', 'time_updated'], ascending=False)
     df = df.reset_index(drop=True)
     os.system('clear')
     print BARS
@@ -80,8 +80,8 @@ def now_():
     return pd.datetime.now().strftime("%Y%m%d.%H%M.%S.%f")
 
 
-def add_item(df, input_):
-    df = df.append(pd.DataFrame([[input_, now_(), now_()]], columns=['task', 'time_added', 'time_updated']), ignore_index=True)
+def add_item(df, input_, importance_=0):
+    df = df.append(pd.DataFrame([[input_, now_(), now_(), importance_]], columns=['task', 'time_added', 'time_updated', 'importance']), ignore_index=True)
     return df
 
 
@@ -110,8 +110,6 @@ def main():
             input_ = arg_[0]
             if input_ == 'a':
                 mode = MODE_ADD
-            elif input_ == 'at':
-                mode = MODE_ADDTOP
             elif input_ == 'l':
                 mode = MODE_LIST
             elif input_ in ['e', '']:
@@ -136,17 +134,7 @@ def main():
                 mode = MODE_LIST
             else:
                 # under dev
-                df = add_item(df, input_)
-                df.to_csv('todo.csv', sep='\t')
-        elif mode == MODE_ADDTOP:
-            input_ = raw_input('task: ')
-            if input_ == '':
-                mode = MODE_LIST
-            else:
-                df = add_item(df, input_)
-                reorder_ = [len(df) - 1] + range(len(df) - 1)
-                df = df.reindex(reorder_).reset_index(drop=True)
-                df.to_csv('todo.csv', sep='\t')
+                df = add_item(df, input_, arg_[1])
         elif mode == MODE_DEL:
             id_delete = int(raw_input('id to delete: '))
             print str(df.loc[id_delete])
@@ -158,23 +146,6 @@ def main():
         elif mode == MODE_TOP:
             i = int(raw_input('id to bring top: '))
             df.loc[i, 'time_updated'] = now_()
-            df.to_csv(CSV, sep='\t')
-            mode = MODE_LIST
-        elif mode == MODE_BOTTOM:
-            i = int(raw_input('id to bring bottom: '))
-            reorder_ = range(i) + range(i+1, len(df)) + [i]
-            df = df.reindex(reorder_).reset_index(drop=True)
-            df.to_csv(CSV, sep='\t')
-            mode = MODE_LIST
-        elif mode == MODE_DOWN:
-            input_ = raw_input('id to bring down: ').split(',')
-            if len(input_) == 2:
-                i, j = [int(x) for x in input_]
-            else:
-                i = int(input_[0])
-                j = 1
-            reorder_ = range(i) + range(i+1, i+j+1) + [i] + range(i+j+1, len(df))
-            df = df.reindex(reorder_).reset_index(drop=True)
             df.to_csv(CSV, sep='\t')
             mode = MODE_LIST
         elif mode == MODE_DONE:
@@ -201,7 +172,7 @@ def main():
     for i in range(len(df)):
         basename = str(df.iloc[i]['time_added']) + '-' + str(df.iloc[i]['task']).replace('/', '_') + '.csv'
         df[i:i+1].to_csv(os.path.join(ROOTDIR, 'todo', basename), sep='\t', index=False)
-
+    df.to_csv(os.path.join(ROOTDIR,'todo.csv'), sep='\t')
 
 if __name__ == '__main__':
     main()
