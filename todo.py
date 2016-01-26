@@ -46,20 +46,25 @@ CSV_PEND = os.path.join(ROOTDIR, 'pend.csv')
 def fill_empty_cells(df):
     slice_ = df['time_added'].isnull()
     df.loc[slice_, 'time_added'] = df.loc[slice_, 'time_updated']
+    slice_ = df['importance'].isnull()
+    df.loc[slice_, 'importance'] = 0
     return df
+
 
 def display_list(df):
     df = fill_empty_cells(df)
-    df = df.sort_values(by='time_updated', ascending=False)
+    df = df.sort_values(by='task', ascending=False)
+    df = df.sort_values(by='time_added', ascending=False)
+    df = df.sort_values(by=['importance','time_updated'], ascending=False)
     df = df.reset_index(drop=True)
     os.system('clear')
     print BARS
     counter_ = 0
-    for id_, row in df.iterrows():
+    for id_, row in df[['task','time_added','time_updated','importance']].iterrows():
         if id_ == 0:
-            print bcolors.OKGREEN + str(id_) + ' ' + str(row[0]) + ' ' + str(row[1]) + ' ' + str(row[2]) + bcolors.ENDC
+            print bcolors.OKGREEN + str(id_) + ' ' + str(row[0]) + ' ' + str(row[1]) + ' ' + str(row[2]) + ' ' + str(row[3]) + bcolors.ENDC
         else:
-            print id_, row[0], row[1], row[2]
+            print id_, row[0], row[1], row[2], row[3]
         if counter_ == MAX_PRINT:
             input_ = raw_input(BARS + ' (s)skip: ')
             if input_ == 's':
@@ -68,6 +73,7 @@ def display_list(df):
         else:
             print BARS
         counter_ += 1
+    return df
 
 
 def now_():
@@ -79,7 +85,7 @@ def add_item(df, input_):
     return df
 
 
-mode_read = 0
+mode_read = 1
 def main():
     df = pd.DataFrame()
     try:
@@ -96,7 +102,7 @@ def main():
     mode = MODE_LIST
     while mode != MODE_EXIT:
         if mode == MODE_LIST:
-            display_list(df)
+            df = display_list(df)
             mode = MODE_SELECT
         elif mode == MODE_SELECT:
             input_ = raw_input('(a)add, (at)add top, (l)list, (d)delete, (t)top, (dw)down, (done), (e)exit :')
@@ -151,9 +157,7 @@ def main():
             mode = MODE_LIST
         elif mode == MODE_TOP:
             i = int(raw_input('id to bring top: '))
-            reorder_ = [i] + range(i) + range(i+1, len(df))
-            df = df.reindex(reorder_).reset_index(drop=True)
-            df.loc[0, 'time_updated'] = now_()
+            df.loc[i, 'time_updated'] = now_()
             df.to_csv(CSV, sep='\t')
             mode = MODE_LIST
         elif mode == MODE_BOTTOM:
