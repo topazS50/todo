@@ -1,0 +1,2 @@
+rsync -auv -e ssh ~/.todo/* ogawak@selene:/home/ogawak/.todo/
+rsync -auv -e ssh ogawak@selene:/home/ogawak/.todo/* ~/.todo/

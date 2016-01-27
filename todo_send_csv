@@ -1,3 +1,0 @@
-ssh -l ogawak selene cp /home/ogawak/todo.csv /home/ogawak/todo.csv-
-ssh -l ogawak selene cp /home/ogawak/done.csv /home/ogawak/done.csv-
-rsync -av -e ssh ~/.todo/* ogawak@selene:/home/ogawak/.todo/
