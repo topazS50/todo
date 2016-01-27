@@ -90,6 +90,11 @@ def add_item(df, input_, importance_=0):
     return df
 
 
+def save_csv(i, df):
+        basename = str(df.iloc[i]['time_added']) + '-' + str(df.iloc[i]['task']).replace('/', '_') + '.csv'
+        df[i:i+1].to_csv(os.path.join(ROOTDIR, 'todo', basename), sep='\t', index=False)
+
+
 def main():
     mode_read = 1
     df = pd.DataFrame()
@@ -138,8 +143,8 @@ def main():
             if input_ == '':
                 mode = MODE_LIST
             else:
-                # under dev
                 df = add_item(df, input_, arg_[1])
+                save_csv(len(df)-1,df)
         elif mode == MODE_DEL:
             id_delete = int(raw_input('id to delete: '))
             print str(df.loc[id_delete])
@@ -151,11 +156,13 @@ def main():
         elif mode == MODE_TOP:
             i = int(raw_input('id to bring top: '))
             df.loc[i, 'time_updated'] = now_()
+            save_csv(i, df)
             df.to_csv(CSV, sep='\t')
             mode = MODE_LIST
         elif mode == MODE_DONE:
             id_ = int(raw_input('id done: '))
             df.loc[id_,'status'] = DONE
+            save_csv(id_, df)
             mode = MODE_LIST
         elif mode == MODE_PEND:
             id_ = int(raw_input('id done: '))
@@ -170,9 +177,9 @@ def main():
             subprocess.check_call(EDITOR + ' ' + os.path.join(ROOTDIR, fileedit), shell=True)
             mode = MODE_LIST
 
-    for i in range(len(df)):
-        basename = str(df.iloc[i]['time_added']) + '-' + str(df.iloc[i]['task']).replace('/', '_') + '.csv'
-        df[i:i+1].to_csv(os.path.join(ROOTDIR, 'todo', basename), sep='\t', index=False)
+#    for i in range(len(df)):
+#        basename = str(df.iloc[i]['time_added']) + '-' + str(df.iloc[i]['task']).replace('/', '_') + '.csv'
+#        df[i:i+1].to_csv(os.path.join(ROOTDIR, 'todo', basename), sep='\t', index=False)
     df.to_csv(os.path.join(ROOTDIR,'todo.csv'), sep='\t')
 
 if __name__ == '__main__':
