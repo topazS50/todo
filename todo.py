@@ -30,6 +30,7 @@ MODE_DONE = count_.next()
 MODE_PEND = count_.next()
 MODE_EDIT = count_.next()
 MODE_MOVE = count_.next()
+DONE = count_.next()
 
 BARS = '---------'
 MAX_PRINT = 10
@@ -55,6 +56,7 @@ def fill_empty_cells(df):
 def display_list(df):
     df = fill_empty_cells(df)
     df['status'] = df['status'].apply(int)
+    df = df[df['status'] != DONE]
     df['importance'] = df['importance'].apply(int)
     df = df.sort_values(by='task', ascending=False)
     df = df.sort_values(by='time_added', ascending=False)
@@ -153,11 +155,7 @@ def main():
             mode = MODE_LIST
         elif mode == MODE_DONE:
             id_ = int(raw_input('id done: '))
-            with open(CSV_DONE, 'a') as fa:
-                df.loc[id_, 'time_done'] = now_()
-                df.loc[id_:id_].to_csv(fa, sep='\t', header=False)
-            df = df.drop([id_])
-            df = df.reset_index(drop=True)
+            df.loc[id_,'status'] = DONE
             mode = MODE_LIST
         elif mode == MODE_PEND:
             id_ = int(raw_input('id done: '))
