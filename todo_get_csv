@@ -1,3 +1,0 @@
-cp -rp ~/.todo/todo.csv ~/.todo/todo.csv-
-cp -rp ~/.todo/done.csv ~/.todo/done.csv-
-rsync -acuvz -e ssh ogawak@selene:/home/ogawak/.todo/* ~/.todo/
