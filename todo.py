@@ -32,6 +32,7 @@ MODE_EDIT = count_.next()
 MODE_MOVE = count_.next()
 MODE_VOID = count_.next()
 DONE = count_.next()
+DEL = count_.next()
 
 BARS = '---------'
 MAX_PRINT = 10
@@ -59,7 +60,7 @@ def display_list(df):
     arg_ = ''
     df = fill_empty_cells(df)
     df['status'] = df['status'].apply(int)
-    df = df[df['status'] != DONE]
+    df = df[df['status'] == 0]
     df['importance'] = df['importance'].apply(int)
     df = df.sort_values(by='task', ascending=False)
     df = df.sort_values(by='time_added', ascending=False)
@@ -164,6 +165,9 @@ def main():
             print str(df.loc[id_delete])
             input_ = raw_input('delete this?[y/N]: ')
             if input_ == 'y':
+                df.loc[id_delete, 'status'] = DONE
+                save_csv(id_delete, df)
+                mode = MODE_LIST
                 df = df.drop([id_delete])
                 df = df.reset_index(drop=True)
             mode = MODE_LIST
