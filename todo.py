@@ -70,10 +70,11 @@ def display_list(df):
     counter_ = 0
     for id_, row in df[['task', 'time_added', 'time_updated', 'importance', 'status']].iterrows():
         if id_ == 0:
-            print bcolors.OKGREEN + str(id_) + ' ' + str(row[0]) + ' ' + str(row[1]) + ' ' + str(row[2]) + ' ' + str(row[3]) + ' ' + str(row[4]) + bcolors.ENDC
+            print bcolors.OKGREEN + str(id_) + ' ' + str(row[0]) + ' ' + str(row[1][4:8]) + ' ' + str(row[2][4:8]) + ' ' + str(row[3]) + ' ' + str(row[4]) + bcolors.ENDC
         else:
-            print id_, row[0], row[1], row[2], row[3], row[4]
+            print id_, row[0], row[1][4:8], row[2][4:8], row[3], row[4]
         if counter_ == MAX_PRINT:
+            print BARS + '   ',
             mode, arg_ = select_mode()
             if mode != MODE_VOID:
                 break
