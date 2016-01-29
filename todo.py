@@ -32,6 +32,7 @@ MODE_EDIT = count_.next()
 MODE_MOVE = count_.next()
 MODE_VOID = count_.next()
 DONE = count_.next()
+PEND = count_.next()
 DEL = count_.next()
 
 BARS = '---------'
@@ -71,7 +72,8 @@ def display_list(df):
     counter_ = 0
     for id_, row in df[['task', 'time_added', 'time_updated', 'importance', 'status']].iterrows():
         if id_ == 0:
-            print bcolors.OKGREEN + str(id_) + ' ' + str(row[0]) + ' ' + str(row[1][4:8]) + ' ' + str(row[2][4:8]) + ' ' + str(row[3]) + ' ' + str(row[4]) + bcolors.ENDC
+            print bcolors.OKGREEN + str(id_) + ' ' + str(row[0]) + ' ' + str(row[1][4:8]) +' ' + str(row[2][4:8]) + ' ' + str(row[3]) + ' ' + str(row[4]) + bcolors.ENDC
+
         else:
             print id_, row[0], row[1][4:8], row[2][4:8], row[3], row[4]
         if counter_ == MAX_PRINT:
@@ -101,7 +103,7 @@ def save_csv(i, df):
 
 
 def select_mode():
-    input_ = raw_input('(a)add, (at)add top, (l)list, (d)delete, (t)top, (dw)down, (done), (e)exit :')
+    input_ = raw_input('(a)add, (at)add top, (l)list, (d)delete, (t)top, (done), (pend), (e)exit :')
     arg_ = input_.split(' ')
     input_ = arg_[0]
     if input_ == 'a':
@@ -183,11 +185,9 @@ def main():
             save_csv(id_, df)
             mode = MODE_LIST
         elif mode == MODE_PEND:
-            id_ = int(raw_input('id done: '))
-            with open(CSV_PEND, 'a') as fa:
-                df.loc[id_:id_].to_csv(fa, header=False)
-            df = df.drop([id_])
-            df = df.reset_index(drop=True)
+            id_ = int(raw_input('id pend: '))
+            df.loc[id_, 'status'] = PEND
+            save_csv(id_, df)
             mode = MODE_LIST
         elif mode == MODE_EDIT:
             id_ = int(raw_input('id edit: '))
