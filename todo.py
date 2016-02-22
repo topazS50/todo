@@ -32,6 +32,7 @@ MODE_EDIT = count_.next()
 MODE_MOVE = count_.next()
 MODE_VOID = count_.next()
 DONE = count_.next()
+PEND = count_.next()
 DEL = count_.next()
 
 BARS = '---------'
@@ -183,11 +184,9 @@ def main():
             save_csv(id_, df)
             mode = MODE_LIST
         elif mode == MODE_PEND:
-            id_ = int(raw_input('id done: '))
-            with open(CSV_PEND, 'a') as fa:
-                df.loc[id_:id_].to_csv(fa, header=False)
-            df = df.drop([id_])
-            df = df.reset_index(drop=True)
+            id_ = int(raw_input('id pend: '))
+            df.loc[id_, 'status'] = PEND
+            save_csv(id_, df)
             mode = MODE_LIST
         elif mode == MODE_EDIT:
             id_ = int(raw_input('id edit: '))
