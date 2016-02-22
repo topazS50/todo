@@ -72,7 +72,8 @@ def display_list(df):
     counter_ = 0
     for id_, row in df[['task', 'time_added', 'time_updated', 'importance', 'status']].iterrows():
         if id_ == 0:
-            print bcolors.OKGREEN + str(id_) + ' ' + str(row[0]) + ' ' + str(row[1][4:8]) + ' ' + str(row[2][4:8]) + ' ' + str(row[3]) + ' ' + str(row[4]) + bcolors.ENDC
+            print bcolors.OKGREEN + str(id_) + ' ' + str(row[0]) + ' ' + str(row[1][4:8]) +' ' + str(row[2][4:8]) + ' ' + str(row[3]) + ' ' + str(row[4]) + bcolors.ENDC
+
         else:
             print id_, row[0], row[1][4:8], row[2][4:8], row[3], row[4]
         if counter_ == MAX_PRINT:
@@ -102,7 +103,7 @@ def save_csv(i, df):
 
 
 def select_mode():
-    input_ = raw_input('(a)add, (at)add top, (l)list, (d)delete, (t)top, (dw)down, (done), (e)exit :')
+    input_ = raw_input('(a)add, (at)add top, (l)list, (d)delete, (t)top, (done), (pend), (e)exit :')
     arg_ = input_.split(' ')
     input_ = arg_[0]
     if input_ == 'a':
