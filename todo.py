@@ -59,7 +59,11 @@ def fill_empty_cells(df):
 def display_list(df):
     mode = MODE_SELECT
     arg_ = ''
-    df = fill_empty_cells(df)
+    try:
+        df = fill_empty_cells(df)
+    except:
+        df = pd.DataFrame(columns=['task', 'time_added', 'time_updated', 'importance', 'status'])
+
     df['status'] = df['status'].apply(int)
     df = df[df['status'] == 0]
     df['importance'] = df['importance'].apply(int)
